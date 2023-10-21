@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using DG.Tweening;
+using System;
 
 public class Player : MonoBehaviour
 {
@@ -17,6 +18,8 @@ public class Player : MonoBehaviour
     public float jumpScaleY = 1.5f;
     public float jumpScaleX = .7f;
     public float jumpAnimationDuration = .3f;
+    public Animator animator;
+    public string triggerRun = "Run";
 
     private bool _isJumpAnimationInProgress = false;
 
@@ -27,6 +30,7 @@ public class Player : MonoBehaviour
             myRigidBody = GetComponent<Rigidbody2D>();
         }
         Debug.Assert(myRigidBody != null);
+        Debug.Assert(animator != null);
     }
 
     void Update()
@@ -49,11 +53,12 @@ public class Player : MonoBehaviour
         //myRigidBody.transform.DOScaleY(jumpScaleY, jumpAnimationDuration).SetLoops(2, LoopType.Yoyo);
         if (!_isJumpAnimationInProgress)
         {
+            float originalScaleX = myRigidBody.transform.localScale.x;
             _isJumpAnimationInProgress = true;
-            myRigidBody.transform.DOScaleX(jumpScaleX, jumpAnimationDuration / 2);
+            myRigidBody.transform.DOScaleX(originalScaleX * jumpScaleX, jumpAnimationDuration / 2);
             myRigidBody.transform.DOScaleY(jumpScaleY, jumpAnimationDuration / 2);
             yield return new WaitForSeconds(jumpAnimationDuration / 2);
-            myRigidBody.transform.DOScaleX(1, jumpAnimationDuration / 2);
+            myRigidBody.transform.DOScaleX(originalScaleX, jumpAnimationDuration / 2);
             myRigidBody.transform.DOScaleY(1, jumpAnimationDuration / 2);
             yield return new WaitForSeconds(jumpAnimationDuration / 2);
             _isJumpAnimationInProgress = false;
@@ -64,17 +69,30 @@ public class Player : MonoBehaviour
     {
         bool isSpeedKeyPressed = Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.LeftShift);
         float speed = isSpeedKeyPressed ? sideRunningSpeed : sideSpeed;
+        bool isMovingLeft = Input.GetKey(KeyCode.LeftArrow);
+        bool isMovingRight = Input.GetKey(KeyCode.RightArrow);
+        bool isMoving = isMovingLeft ^ isMovingRight;
 
-        if (Input.GetKey(KeyCode.LeftArrow))
+        if (isMovingLeft && !isMovingRight)
         {
             //rb.MovePosition(rb.position - sideVelocity * Time.deltaTime);
             myRigidBody.velocity = new Vector2(-speed, myRigidBody.velocity.y);
+            if (myRigidBody.transform.localScale.x > 0)
+            {
+                myRigidBody.transform.DOScaleX(-1, .1f);
+            }
         }
-        if (Input.GetKey(KeyCode.RightArrow))
+        else if (isMovingRight && !isMovingLeft)
         {
             //rb.MovePosition(rb.position + sideVelocity * Time.deltaTime);
             myRigidBody.velocity = new Vector2(speed, myRigidBody.velocity.y);
+            if (myRigidBody.transform.localScale.x < 0)
+            {
+                myRigidBody.transform.DOScaleX(1, .1f);
+            }
         }
+        animator.SetBool(triggerRun, isMoving);
+        animator.speed = isMoving && isSpeedKeyPressed ? 2 : 1;
 
         if (myRigidBody.velocity.x > sideFriction)
         {
