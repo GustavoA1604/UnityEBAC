@@ -20,17 +20,35 @@ public class Player : MonoBehaviour
     public float jumpAnimationDuration = .3f;
     public Animator animator;
     public string triggerRun = "Run";
+    public string triggerDeath = "Death";
 
     private bool _isJumpAnimationInProgress = false;
+    public HealthBase myHealthBase;
 
-    void Start()
+    void Awake()
     {
         if (myRigidBody == null)
         {
             myRigidBody = GetComponent<Rigidbody2D>();
         }
+        if (myHealthBase == null)
+        {
+            myHealthBase = GetComponent<HealthBase>();
+        }
+        Debug.Assert(myHealthBase != null);
         Debug.Assert(myRigidBody != null);
         Debug.Assert(animator != null);
+    }
+
+    void Start()
+    {
+        myHealthBase.OnKill += OnPlayerKill;
+    }
+
+    private void OnPlayerKill()
+    {
+        myHealthBase.OnKill -= OnPlayerKill;
+        animator.SetTrigger(triggerDeath);
     }
 
     void Update()
