@@ -6,8 +6,8 @@ using UnityEngine;
 public class ItemManager : MonoBehaviour
 {
     public static ItemManager instance;
-    public TextMeshProUGUI textCoins;
-    public int coins = 0;
+    public SOInt coins;
+    public SOInt planets;
 
     void Awake()
     {
@@ -28,17 +28,17 @@ public class ItemManager : MonoBehaviour
 
     private void Reset()
     {
-        SetCoins(0);
+        coins.value = 0;
+        planets.value = 0;
     }
 
     public void AddCoins(int number = 1)
     {
-        SetCoins(coins + number);
+        coins.value += number;
     }
 
-    private void SetCoins(int number)
+    public void AddPlanets(int number = 1)
     {
-        coins = number;
-        textCoins.SetText(coins.ToString());
+        planets.value += number;
     }
 }

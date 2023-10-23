@@ -2,28 +2,14 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using DG.Tweening;
-using System;
 
 public class Player : MonoBehaviour
 {
+    public SOPlayerSetup soPlayerSetup;
     public Rigidbody2D myRigidBody;
-
-    [Header("Movement")]
-    public float sideSpeed = 10f;
-    public float sideRunningSpeed = 20f;
-    public float sideFriction = .1f;
-    public float jumpSpeed = 10f;
-
-    [Header("Animation")]
-    public float jumpScaleY = 1.5f;
-    public float jumpScaleX = .7f;
-    public float jumpAnimationDuration = .3f;
-    public Animator animator;
-    public string triggerRun = "Run";
-    public string triggerDeath = "Death";
-
-    private bool _isJumpAnimationInProgress = false;
     public HealthBase myHealthBase;
+    private bool _isJumpAnimationInProgress = false;
+    private Animator _currentPlayer;
 
     void Awake()
     {
@@ -37,7 +23,10 @@ public class Player : MonoBehaviour
         }
         Debug.Assert(myHealthBase != null);
         Debug.Assert(myRigidBody != null);
-        Debug.Assert(animator != null);
+        Debug.Assert(soPlayerSetup != null);
+        Debug.Assert(soPlayerSetup.animator != null);
+        _currentPlayer = Instantiate(soPlayerSetup.animator, transform);
+        _currentPlayer.transform.position = transform.position;
     }
 
     void Start()
@@ -48,7 +37,7 @@ public class Player : MonoBehaviour
     private void OnPlayerKill()
     {
         myHealthBase.OnKill -= OnPlayerKill;
-        animator.SetTrigger(triggerDeath);
+        _currentPlayer.SetTrigger(soPlayerSetup.triggerDeath);
     }
 
     void Update()
@@ -61,7 +50,7 @@ public class Player : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.Space))
         {
-            myRigidBody.velocity = new Vector2(myRigidBody.velocity.x, jumpSpeed);
+            myRigidBody.velocity = new Vector2(myRigidBody.velocity.x, soPlayerSetup.jumpSpeed);
             StartCoroutine(HandleScaleJumpAnimation());
         }
     }
@@ -73,12 +62,12 @@ public class Player : MonoBehaviour
         {
             float originalScaleX = myRigidBody.transform.localScale.x;
             _isJumpAnimationInProgress = true;
-            myRigidBody.transform.DOScaleX(originalScaleX * jumpScaleX, jumpAnimationDuration / 2);
-            myRigidBody.transform.DOScaleY(jumpScaleY, jumpAnimationDuration / 2);
-            yield return new WaitForSeconds(jumpAnimationDuration / 2);
-            myRigidBody.transform.DOScaleX(originalScaleX, jumpAnimationDuration / 2);
-            myRigidBody.transform.DOScaleY(1, jumpAnimationDuration / 2);
-            yield return new WaitForSeconds(jumpAnimationDuration / 2);
+            myRigidBody.transform.DOScaleX(originalScaleX * soPlayerSetup.jumpScaleX, soPlayerSetup.jumpAnimationDuration / 2);
+            myRigidBody.transform.DOScaleY(soPlayerSetup.jumpScaleY, soPlayerSetup.jumpAnimationDuration / 2);
+            yield return new WaitForSeconds(soPlayerSetup.jumpAnimationDuration / 2);
+            myRigidBody.transform.DOScaleX(originalScaleX, soPlayerSetup.jumpAnimationDuration / 2);
+            myRigidBody.transform.DOScaleY(1, soPlayerSetup.jumpAnimationDuration / 2);
+            yield return new WaitForSeconds(soPlayerSetup.jumpAnimationDuration / 2);
             _isJumpAnimationInProgress = false;
         }
     }
@@ -86,7 +75,7 @@ public class Player : MonoBehaviour
     private void HandleSideMovement()
     {
         bool isSpeedKeyPressed = Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.LeftShift);
-        float speed = isSpeedKeyPressed ? sideRunningSpeed : sideSpeed;
+        float speed = isSpeedKeyPressed ? soPlayerSetup.sideRunningSpeed : soPlayerSetup.sideSpeed;
         bool isMovingLeft = Input.GetKey(KeyCode.LeftArrow);
         bool isMovingRight = Input.GetKey(KeyCode.RightArrow);
         bool isMoving = isMovingLeft ^ isMovingRight;
@@ -109,16 +98,16 @@ public class Player : MonoBehaviour
                 myRigidBody.transform.DOScaleX(1, .1f);
             }
         }
-        animator.SetBool(triggerRun, isMoving);
-        animator.speed = isMoving && isSpeedKeyPressed ? 2 : 1;
+        _currentPlayer.SetBool(soPlayerSetup.triggerRun, isMoving);
+        _currentPlayer.speed = isMoving && isSpeedKeyPressed ? 2 : 1;
 
-        if (myRigidBody.velocity.x > sideFriction)
+        if (myRigidBody.velocity.x > soPlayerSetup.sideFriction)
         {
-            myRigidBody.velocity -= new Vector2(sideFriction, 0);
+            myRigidBody.velocity -= new Vector2(soPlayerSetup.sideFriction, 0);
         }
-        else if (myRigidBody.velocity.x < -sideFriction)
+        else if (myRigidBody.velocity.x < -soPlayerSetup.sideFriction)
         {
-            myRigidBody.velocity += new Vector2(sideFriction, 0);
+            myRigidBody.velocity += new Vector2(soPlayerSetup.sideFriction, 0);
         }
         else if (myRigidBody.velocity.x != 0)
         {
