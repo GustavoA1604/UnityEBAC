@@ -62,6 +62,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   compareTag: Player
+  myParticleSystem: {fileID: 0}
+  graphicItem: {fileID: 707761731089916518}
 --- !u!1 &707761731089916518
 GameObject:
   m_ObjectHideFlags: 0
