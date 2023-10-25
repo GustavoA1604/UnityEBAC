@@ -16,6 +16,8 @@ public class Player : MonoBehaviour
     [Header("VFX")]
     public ParticleSystem walkVFX;
     public ParticleSystem jumpVFX;
+    [Header("Sound")]
+    public AudioSource audioSourceJump;
 
     void Awake()
     {
@@ -68,6 +70,7 @@ public class Player : MonoBehaviour
         {
             myRigidBody.velocity = new Vector2(myRigidBody.velocity.x, soPlayerSetup.jumpSpeed);
             StartCoroutine(HandleScaleJumpAnimation());
+            if (audioSourceJump != null) audioSourceJump.Play();
         }
     }
 

@@ -8,13 +8,8 @@ public class CollectableBase : MonoBehaviour
     public ParticleSystem myParticleSystem;
     public GameObject graphicItem;
 
-    /* void Awake()
-    {
-        if (myParticleSystem != null)
-        {
-            myParticleSystem.transform.SetParent(null);
-        }
-    } */
+    [Header("Sound")]
+    public AudioSource audioSourceOnCollect;
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
@@ -45,6 +40,10 @@ public class CollectableBase : MonoBehaviour
         if (myParticleSystem != null)
         {
             myParticleSystem.Play();
+        }
+        if (audioSourceOnCollect != null)
+        {
+            audioSourceOnCollect.Play();
         }
     }
 
