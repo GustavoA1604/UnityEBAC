@@ -29,6 +29,7 @@ public class CollectableBase : MonoBehaviour
     private IEnumerator HideObject()
     {
         graphicItem.gameObject.SetActive(false);
+        GetComponent<Collider>().enabled = false;
         float sec = myParticleSystem == null ? 0 : myParticleSystem.main.duration;
         yield return new WaitForSeconds(sec);
         gameObject.SetActive(false);
