@@ -23,9 +23,33 @@ public class PlayerController : MonoBehaviour
     private Vector3 _targetPos;
     private bool _isInvincible = false;
 
+    [Header("Animation")]
+    public AnimatorManager animatorManager;
+
     [Header("Particle")]
     public ParticleSystem particleSystemSpeedUp;
     public ParticleSystem particleSystemInvincible;
+
+    private void GetAnimatorManagerComponent()
+    {
+        if (animatorManager == null)
+        {
+            animatorManager = GetComponent<AnimatorManager>();
+        }
+        if (animatorManager == null)
+        {
+            animatorManager = GetComponentInChildren<AnimatorManager>();
+        }
+    }
+    void OnValidate()
+    {
+        GetAnimatorManagerComponent();
+    }
+
+    void Awake()
+    {
+        GetAnimatorManagerComponent();
+    }
 
     private void SetEmission(ParticleSystem particleSystem, bool enabled)
     {
@@ -60,6 +84,11 @@ public class PlayerController : MonoBehaviour
     {
         if (collision.transform.CompareTag(tagEnemy) && !_isInvincible)
         {
+            if (animatorManager != null)
+            {
+                animatorManager.Play(AnimatorManager.AnimationType.DEAD);
+                transform.DOMoveZ(-1f, 1f).SetRelative();
+            }
             EndGame();
         }
     }
@@ -68,6 +97,10 @@ public class PlayerController : MonoBehaviour
     {
         if (other.transform.CompareTag(tagEndLine))
         {
+            if (animatorManager != null)
+            {
+                animatorManager.Play(AnimatorManager.AnimationType.IDLE);
+            }
             EndGame();
         }
     }
@@ -81,6 +114,10 @@ public class PlayerController : MonoBehaviour
     public void StartToRun()
     {
         _canRun = true;
+        if (animatorManager != null)
+        {
+            animatorManager.Play(AnimatorManager.AnimationType.RUN);
+        }
     }
 
     #region POWERUPS
