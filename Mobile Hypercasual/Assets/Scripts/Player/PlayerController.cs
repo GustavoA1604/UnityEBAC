@@ -120,6 +120,11 @@ public class PlayerController : MonoBehaviour
         }
     }
 
+    public void RestartPosition()
+    {
+        transform.position = Vector3.zero;
+    }
+
     #region POWERUPS
 
     public void SetForwardSpeedMultiplier(float speedMultiplier)
