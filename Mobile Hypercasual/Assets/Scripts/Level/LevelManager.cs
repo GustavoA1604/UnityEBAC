@@ -1,29 +1,21 @@
+using System.Collections;
 using System.Collections.Generic;
+using DG.Tweening;
 using UnityEngine;
 using UnityEngine.Assertions;
 
 public class LevelManager : MonoBehaviour
 {
-    //public Transform container;
-    //public List<GameObject> levels;
-    //[SerializeField] private int _index = 0;
+    [Header("Animation")]
+    public float timeToCreatePiece = .2f;
+    public float timeBetweenPieceCreation = .15f;
+    public Ease pieceCreationEase = Ease.OutBack;
+
     private GameObject _currentLevel = null;
+    private GameObject _startPiece = null;
+    private List<GameObject> _middlePieces = new List<GameObject>();
+    private GameObject _endPiece = null;
 
-    /* private void Awake()
-    {
-        SpawnNextLevel();
-    } */
-
-    /* private void SpawnNextLevel()
-    {
-        if (_currentLevel != null)
-        {
-            Destroy(_currentLevel);
-            _index = (_index + 1) % levels.Count;
-        }
-        _currentLevel = Instantiate(levels[_index], container);
-        _currentLevel.transform.localPosition = Vector3.zero;
-    } */
 
     public void InstantiateLevel(SOLevel level)
     {
@@ -38,17 +30,20 @@ public class LevelManager : MonoBehaviour
         _currentLevel = GameObject.Instantiate(new GameObject(), Vector3.zero, Quaternion.identity);
         _currentLevel.transform.parent = transform;
 
-        GameObject startPiece = Instantiate(level.startPiece.gameObject, _currentLevel.transform);
-        startPiece.transform.position = _currentLevel.transform.position;
-        Transform pieceEnd = startPiece.GetComponent<LevelPiece>().end;
+        _startPiece = Instantiate(level.startPiece.gameObject, _currentLevel.transform);
+        _startPiece.transform.position = _currentLevel.transform.position;
+        _startPiece.SetActive(false);
+        Transform localPieceEnd = _startPiece.GetComponent<LevelPiece>().end;
 
-        pieceEnd = InstantiateLevelContents(level, pieceEnd);
+        localPieceEnd = InstantiateLevelContents(level, localPieceEnd);
 
-        GameObject endPiece = Instantiate(level.endPiece.gameObject, _currentLevel.transform);
-        endPiece.transform.position = pieceEnd.transform.position;
+        _endPiece = Instantiate(level.endPiece.gameObject, _currentLevel.transform);
+        _endPiece.transform.position = localPieceEnd.transform.position;
+
+        StartCoroutine(AnimateLevelInstantiation());
     }
 
-    private Transform InstantiateLevelContents(SOLevel level, Transform pieceEnd)
+    private Transform InstantiateLevelContents(SOLevel level, Transform localPieceEnd)
     {
         switch (level.levelGenType)
         {
@@ -67,22 +62,44 @@ public class LevelManager : MonoBehaviour
                 }
                 foreach (LevelPiece piece in level.levelPieces)
                 {
-                    GameObject instantiatedPiece = Instantiate(piece.gameObject, _currentLevel.transform);
-                    instantiatedPiece.transform.position = pieceEnd.transform.position;
-                    pieceEnd = instantiatedPiece.GetComponent<LevelPiece>().end;
+                    localPieceEnd = InstantiateMiddlePiece(piece, localPieceEnd);
                 }
                 break;
             case LevelGenerationTypeT.RANDOM_CONTENTS:
                 for (int i = 0; i < level.numberOfPieces; i++)
                 {
                     int k = Random.Range(0, level.levelPieces.Count - 1);
-                    GameObject instantiatedPiece = Instantiate(level.levelPieces[k].gameObject, _currentLevel.transform);
-                    instantiatedPiece.transform.position = pieceEnd.transform.position;
-                    pieceEnd = instantiatedPiece.GetComponent<LevelPiece>().end;
+                    localPieceEnd = InstantiateMiddlePiece(level.levelPieces[k], localPieceEnd);
                 }
                 break;
         }
-        return pieceEnd;
+        return localPieceEnd;
+    }
+
+    private Transform InstantiateMiddlePiece(LevelPiece piece, Transform localPieceEnd)
+    {
+        GameObject instantiatedPiece = Instantiate(piece.gameObject, _currentLevel.transform);
+        instantiatedPiece.transform.position = localPieceEnd.transform.position;
+        _middlePieces.Add(instantiatedPiece);
+        return instantiatedPiece.GetComponent<LevelPiece>().end;
+    }
+
+    private IEnumerator AnimateLevelInstantiation()
+    {
+        yield return null;
+
+        foreach (GameObject piece in _middlePieces)
+        {
+            piece.transform.localScale = Vector3.zero;
+        }
+        _endPiece.transform.localScale = Vector3.zero;
+
+        for (int i = 0; i < _middlePieces.Count; i++)
+        {
+            _middlePieces[i].transform.DOScale(1, timeToCreatePiece).SetEase(pieceCreationEase);
+            yield return new WaitForSeconds(timeBetweenPieceCreation);
+        }
+        _endPiece.transform.DOScale(1, timeToCreatePiece).SetEase(pieceCreationEase);
     }
 
     public void DestroyCurrentLevel()
@@ -90,6 +107,9 @@ public class LevelManager : MonoBehaviour
         if (_currentLevel != null)
         {
             Destroy(_currentLevel);
+            _startPiece = null;
+            _middlePieces.Clear();
+            _endPiece = null;
         }
     }
 }

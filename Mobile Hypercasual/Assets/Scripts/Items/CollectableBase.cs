@@ -10,6 +10,20 @@ public class CollectableBase : MonoBehaviour
     [Header("Effects")]
     public ParticleSystem myParticleSystem;
     public AudioSource audioSourceOnCollect;
+    public Vector3 rotationSpeed = new Vector3(0f, 0f, 0f);
+
+    void Start()
+    {
+        if (rotationSpeed.y != 0)
+        {
+            graphicItem.gameObject.transform.Rotate(new Vector3(0, Random.Range(0, 360), 0));
+        }
+    }
+
+    void Update()
+    {
+        graphicItem.gameObject.transform.Rotate(rotationSpeed * Time.deltaTime);
+    }
 
     private void OnTriggerEnter(Collider collision)
     {

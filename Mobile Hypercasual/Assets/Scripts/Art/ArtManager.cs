@@ -23,7 +23,8 @@ public class ArtManager : MonoBehaviour
         {
             Destroy(gameObject);
         }
-        theme = Random.Range(0, 2) == 0 ? ArtThemeT.AZULE : ArtThemeT.MUSHROOM;
+        int random = Random.Range(0, 2);
+        theme = random == 0 ? ArtThemeT.AZULE : ArtThemeT.MUSHROOM;
     }
 
     public static ArtThemeT GetTheme()

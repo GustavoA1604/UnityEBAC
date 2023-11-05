@@ -10,6 +10,7 @@ public class PowerUpBase : CollectableBase
     protected override void OnCollect()
     {
         base.OnCollect();
+        GameObject.FindObjectOfType<PlayerController>().CollectPowerUp();
         StartPowerUp();
     }
 

@@ -62,6 +62,7 @@ MonoBehaviour:
   graphicItem: {fileID: 5616407397053654449}
   myParticleSystem: {fileID: 0}
   audioSourceOnCollect: {fileID: 0}
+  rotationSpeed: {x: 0, y: -240, z: 0}
 --- !u!1001 &4697277589730842848
 PrefabInstance:
   m_ObjectHideFlags: 0

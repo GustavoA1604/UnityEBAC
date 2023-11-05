@@ -25,6 +25,8 @@ public class PlayerController : MonoBehaviour
 
     [Header("Animation")]
     public AnimatorManager animatorManager;
+    public float collectPowerUpScaleUp = 1.3f;
+    public float collectPowerUpAnmDuration = .2f;
 
     [Header("Particle")]
     public ParticleSystem particleSystemSpeedUp;
@@ -64,6 +66,8 @@ public class PlayerController : MonoBehaviour
     {
         SetEmission(particleSystemSpeedUp, false);
         SetEmission(particleSystemInvincible, false);
+        transform.localScale = Vector3.zero;
+        transform.DOScale(Vector3.one, 1f);
     }
 
     void Update()
@@ -126,6 +130,13 @@ public class PlayerController : MonoBehaviour
     }
 
     #region POWERUPS
+
+    public void CollectPowerUp()
+    {
+        transform.DOScale(collectPowerUpScaleUp, collectPowerUpAnmDuration)
+            .SetLoops(2, LoopType.Yoyo)
+            .SetEase(Ease.OutBack);
+    }
 
     public void SetForwardSpeedMultiplier(float speedMultiplier)
     {
