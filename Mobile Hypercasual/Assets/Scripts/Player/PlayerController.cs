@@ -31,6 +31,7 @@ public class PlayerController : MonoBehaviour
     [Header("Particle")]
     public ParticleSystem particleSystemSpeedUp;
     public ParticleSystem particleSystemInvincible;
+    public ParticleSystem particleSystemRockHit;
 
     private void GetAnimatorManagerComponent()
     {
@@ -92,6 +93,10 @@ public class PlayerController : MonoBehaviour
             {
                 animatorManager.Play(AnimatorManager.AnimationType.DEAD);
                 transform.DOMoveZ(-1f, 1f).SetRelative();
+            }
+            if (particleSystemRockHit != null)
+            {
+                particleSystemRockHit.Play();
             }
             EndGame();
         }
